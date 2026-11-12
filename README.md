@@ -120,7 +120,7 @@ To start the API with a few thousand prepared real documents without embedding t
 
 Document insertion uses 250-word chunks with 30-word overlap. All chunk embeddings are generated and validated before mutation, preventing partial inserts after an embedding failure. Graph, text, IDs, and model identity share one atomic snapshot, and startup reloads them. Persistence failure raises an error; mutations are not rolled back in memory on disk failure. The document store serializes index access with a lock. Use **one API worker**, because multiple worker processes would have independent memory and could overwrite the snapshot. The core index classes themselves are not thread-safe.
 
-This is a local developer API: no authentication, replication, transactions, multi-process coordination, streaming LLM output, or web frontend is included for Python. Keep the default localhost binding.
+This is a local developer API: no authentication, replication, transactions, multi-process coordination, streaming LLM output, or web frontend is included. Keep the default localhost binding.
 
 ## Project map
 

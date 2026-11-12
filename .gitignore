@@ -1,12 +1,6 @@
-# Compiled binaries
-*.exe
-*.o
-*.out
-a.out
-
-# Build directories
+# Python build output
 build/
-bin/
+dist/
 
 # IDE files
 .vscode/
