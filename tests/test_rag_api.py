@@ -61,3 +61,23 @@ def test_api_validation_and_restart(tmp_path):
     assert restarted.delete(f"/documents/{id}").status_code == 200
     assert restarted.delete(f"/documents/{id}").status_code == 404
     assert restarted.post("/ask", json={"question": "tree"}).json()["abstained"]
+
+
+def test_invalid_embedding_does_not_partially_insert(tmp_path):
+    class InvalidEmbedder(FakeEmbedder):
+        def encode(self, texts):
+            return np.full((len(texts), 2), np.nan)
+    store = DocumentStore(tmp_path / "invalid.npz", InvalidEmbedder())
+    with pytest.raises(ValueError):
+        store.insert("T", "tree " * 600)
+    assert not store.documents
+    assert not store.path.exists()
+
+
+def test_changed_model_rejected_on_restart(tmp_path):
+    path = tmp_path / "identity.npz"
+    DocumentStore(path, FakeEmbedder()).insert("T", "tree")
+    class ChangedModel(FakeEmbedder):
+        model = "different-model"
+    with pytest.raises(ValueError, match="embedding model"):
+        DocumentStore(path, ChangedModel())

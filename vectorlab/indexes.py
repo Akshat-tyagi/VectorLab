@@ -109,6 +109,8 @@ class BruteForce:
             index.entry = state["entry"]
             index.deleted = set(state["deleted"])
             index.rng.bit_generator.state = state["rng"]
+            for id, row in index.vectors.items():
+                index._cache(id, row)
         return index
 
 
@@ -211,9 +213,25 @@ class HNSW(BruteForce):
         self.graph: dict[int, list[list[int]]] = {}
         self.entry: int | None = None
         self.deleted: set[int] = set()
+        self._positions: dict[int, int] = {}
+        self._matrix = np.empty((64, dim), dtype=np.float64)
+
+    def _cache(self, id: int, vector: NDArray) -> None:
+        position = len(self._positions)
+        if position == len(self._matrix):
+            expanded = np.empty((2 * len(self._matrix), self.dim), dtype=np.float64)
+            expanded[:position] = self._matrix
+            self._matrix = expanded
+        self._positions[id] = position
+        norm = np.linalg.norm(vector)
+        self._matrix[position] = vector / norm if self.metric == "cosine" and norm else vector
 
     def _dist(self, q: NDArray, ids: list[int]) -> NDArray:
-        return distances(np.stack([self.vectors[id] for id in ids]), q, self.metric)
+        rows = self._matrix[[self._positions[id] for id in ids]]
+        if self.metric == "cosine":
+            norm = np.linalg.norm(q)
+            return np.clip(1 - rows @ (q / norm), 0, 2) if norm else np.ones(len(ids))
+        return distances(rows, q, self.metric)
 
     def _layer(self, q: NDArray, entries: list[int], ef: int, level: int) -> list[tuple[float, int]]:
         initial = [(float(d), id) for d, id in zip(self._dist(q, entries), entries)]
@@ -240,6 +258,20 @@ class HNSW(BruteForce):
         return sorted((-d, -id) for d, id in best)
 
     def _select(self, q: NDArray, candidates: list[tuple[float, int]], limit: int) -> list[int]:
+        if self.metric == "cosine" and candidates:
+            # One BLAS call replaces a Python/NumPy call for each candidate.
+            rows = self._matrix[[self._positions[id] for _, id in candidates]]
+            pairwise = np.clip(1 - rows @ rows.T, 0, 2)
+            query_distances = np.array([d for d, _ in candidates])
+            eligible = np.ones(len(candidates), dtype=bool)
+            chosen: list[int] = []
+            for position, (_, id) in enumerate(candidates):
+                if eligible[position]:
+                    chosen.append(id)
+                    if len(chosen) == limit:
+                        break
+                    eligible &= pairwise[:, position] >= query_distances
+            return chosen
         selected: list[int] = []
         for distance, id in candidates:
             if not selected or np.all(self._dist(self.vectors[id], selected) >= distance):
@@ -251,6 +283,7 @@ class HNSW(BruteForce):
     def insert(self, id: int, vector: ArrayLike) -> None:
         super().insert(id, vector)
         q = self.vectors[id]
+        self._cache(id, q)
         level = int(-math.log(max(float(self.rng.random()), 1e-15)) / math.log(self.M))
         self.graph[id] = [[] for _ in range(level + 1)]
         if self.entry is None:

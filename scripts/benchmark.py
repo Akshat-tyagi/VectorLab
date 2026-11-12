@@ -51,6 +51,11 @@ def main() -> None:
                 "queries": len(queries), "k": args.k, "metric": "cosine", "seed": 42,
                 "threads": {key: os.getenv(key) for key in ["OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS"]},
                 "data_path": str(args.data), "arguments": vars(args) | {"data": str(args.data), "output": str(args.output)}}
+    provenance_path = args.data.with_suffix(".json")
+    if provenance_path.exists():
+        provenance = json.loads(provenance_path.read_text(encoding="utf-8"))
+        metadata["dataset"] = {key: provenance[key] for key in
+                               ["dataset", "split", "query_split", "model", "backend", "corpus_sha256"]}
     (args.output / "benchmark_environment.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
     fields = ["n", "algorithm", "M", "ef", "ef_construction", "build_seconds", "snapshot_bytes",
               "recall_at_k", "p50_ms", "p95_ms", "mean_ms"]
