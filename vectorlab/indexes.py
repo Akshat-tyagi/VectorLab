@@ -71,7 +71,7 @@ class BruteForce:
         return {"version": 1, "kind": type(self).__name__, "dim": self.dim,
                 "metric": self.metric, "ids": list(self.vectors)}
 
-    def save(self, path: str | Path) -> None:
+    def save(self, path: str | Path, extra_metadata: dict | None = None) -> None:
         """Atomic single-file, non-pickle snapshot, including graph topology."""
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -79,7 +79,8 @@ class BruteForce:
         fd, temporary = tempfile.mkstemp(dir=path.parent, suffix=".npz")
         try:
             with os.fdopen(fd, "wb") as stream:
-                np.savez_compressed(stream, metadata=json.dumps(self._state()), vectors=matrix)
+                state = {**(extra_metadata or {}), **self._state()}
+                np.savez_compressed(stream, metadata=json.dumps(state), vectors=matrix)
                 stream.flush()
                 os.fsync(stream.fileno())
             os.replace(temporary, path)
@@ -106,6 +107,7 @@ class BruteForce:
         if isinstance(index, HNSW):
             index.graph = {int(id): layers for id, layers in state["graph"].items()}
             index.entry = state["entry"]
+            index.deleted = set(state["deleted"])
             index.rng.bit_generator.state = state["rng"]
         return index
 
