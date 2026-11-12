@@ -106,3 +106,30 @@ def test_empty_snapshot(tmp_path):
         path = tmp_path / f"{kind.__name__}.npz"
         kind(2).save(path)
         assert kind.load(path).search([0, 0]) == []
+
+
+def test_independent_metric_examples():
+    from vectorlab.indexes import distances
+    matrix = np.array([[0., 0.], [3., 4.], [-3., -4.]])
+    query = np.array([3., 4.])
+    np.testing.assert_allclose(distances(matrix, query, "euclidean"), [5, 0, 10])
+    np.testing.assert_allclose(distances(matrix, query, "manhattan"), [7, 0, 14])
+    np.testing.assert_allclose(distances(matrix, query, "cosine"), [1, 0, 2], atol=1e-15)
+
+
+@pytest.mark.parametrize("metric", ["cosine", "euclidean", "manhattan"])
+def test_kdtree_identical_vector_tie_order(metric):
+    tree = KDTree(2, metric)
+    for id in [9, 3, 7, 1]:
+        tree.insert(id, [1, 0])
+    assert tree.search([1, 0], 2) == [(1, 0.0), (3, 0.0)]
+
+
+def test_cosine_pruning_regression():
+    # Raw axis differences are invalid lower bounds for cosine distance.
+    tree, oracle = KDTree(2), BruteForce(2)
+    for id, row in enumerate([[100, 1], [1, 1], [0.1, 0.001], [-1, 5], [0, 0]]):
+        tree.insert(id, row)
+        oracle.insert(id, row)
+    np.testing.assert_allclose([d for _, d in tree.search([10, 0.1], 3)],
+                               [d for _, d in oracle.search([10, 0.1], 3)], atol=1e-12)
