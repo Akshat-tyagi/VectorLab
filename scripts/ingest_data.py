@@ -20,6 +20,8 @@ def main() -> None:
     metadata = json.loads((args.data / "news.json").read_text(encoding="utf-8"))
     with np.load(args.data / "news.npz", allow_pickle=False) as archive:
         vectors = archive["vectors"]
+    if len(metadata["texts"]) != len(vectors) or len(metadata["source_rows"]) != len(vectors):
+        parser.error("document metadata and embedding row counts differ")
     if not 1 <= args.limit <= len(vectors):
         parser.error("--limit must lie between 1 and corpus size")
     class Identity:

@@ -1,0 +1,715 @@
+{
+  "dataset": "rajpurkar/squad",
+  "model": "sentence-transformers/all-MiniLM-L6-v2",
+  "corpus_size": 2067,
+  "k": 3,
+  "max_distance": 0.4,
+  "question_count": 25,
+  "retrieval_hit_rate": 0.56,
+  "exact_unfiltered_hit_rate": 0.76,
+  "negative_abstention_rate": 1.0,
+  "questions": [
+    {
+      "id": "56be4db0acb8001400a502ec",
+      "question": "Which NFL team represented the AFC at Super Bowl 50?",
+      "answers": [
+        "Denver Broncos",
+        "Denver Broncos",
+        "Denver Broncos"
+      ],
+      "relevant_ids": [
+        0
+      ],
+      "answer_starts": [
+        177,
+        177,
+        177
+      ],
+      "retrieved": [
+        [
+          0,
+          0.3016668785977643
+        ],
+        [
+          1,
+          0.3728689422127561
+        ]
+      ],
+      "hit": true,
+      "exact_hit": true,
+      "abstained": false
+    },
+    {
+      "id": "56be4e1facb8001400a502f6",
+      "question": "Which Carolina Panthers player was named Most Valuable Player?",
+      "answers": [
+        "Cam Newton",
+        "Cam Newton",
+        "Cam Newton"
+      ],
+      "relevant_ids": [
+        1
+      ],
+      "answer_starts": [
+        77,
+        77,
+        77
+      ],
+      "retrieved": [
+        [
+          9,
+          0.36942492904527446
+        ]
+      ],
+      "hit": false,
+      "exact_hit": false,
+      "abstained": false
+    },
+    {
+      "id": "56be4eafacb8001400a50302",
+      "question": "Who was the Super Bowl 50 MVP?",
+      "answers": [
+        "Von Miller",
+        "Von Miller",
+        "Miller"
+      ],
+      "relevant_ids": [
+        2
+      ],
+      "answer_starts": [
+        248,
+        248,
+        252
+      ],
+      "retrieved": [
+        [
+          42,
+          0.26580200234134344
+        ],
+        [
+          2,
+          0.3950505280741494
+        ]
+      ],
+      "hit": true,
+      "exact_hit": true,
+      "abstained": false
+    },
+    {
+      "id": "56be5333acb8001400a5030a",
+      "question": "Which network broadcasted Super Bowl 50 in the U.S.?",
+      "answers": [
+        "CBS",
+        "CBS",
+        "CBS"
+      ],
+      "relevant_ids": [
+        3
+      ],
+      "answer_starts": [
+        0,
+        0,
+        0
+      ],
+      "retrieved": [
+        [
+          32,
+          0.37041639603237597
+        ],
+        [
+          0,
+          0.3773369495148937
+        ],
+        [
+          3,
+          0.3803727364612295
+        ]
+      ],
+      "hit": true,
+      "exact_hit": true,
+      "abstained": false
+    },
+    {
+      "id": "56be53b8acb8001400a50314",
+      "question": "Who was the NFL Commissioner in early 2012?",
+      "answers": [
+        "Roger Goodell",
+        "Roger Goodell",
+        "Goodell"
+      ],
+      "relevant_ids": [
+        4
+      ],
+      "answer_starts": [
+        32,
+        32,
+        38
+      ],
+      "retrieved": [],
+      "hit": false,
+      "exact_hit": true,
+      "abstained": true
+    },
+    {
+      "id": "56be5438acb8001400a5031a",
+      "question": "Which Louisiana venue was one of three considered for Super Bowl 50?",
+      "answers": [
+        "New Orleans' Mercedes-Benz Superdome",
+        "New Orleans' Mercedes-Benz Superdome",
+        "Mercedes-Benz Superdome"
+      ],
+      "relevant_ids": [
+        5
+      ],
+      "answer_starts": [
+        56,
+        56,
+        69
+      ],
+      "retrieved": [
+        [
+          0,
+          0.3956911480056897
+        ]
+      ],
+      "hit": false,
+      "exact_hit": false,
+      "abstained": false
+    },
+    {
+      "id": "56be54bdacb8001400a50322",
+      "question": "When were the two finalists for hosting Super Bowl 50 announced?",
+      "answers": [
+        "October 16, 2012",
+        "October 16, 2012,",
+        "October 16, 2012"
+      ],
+      "relevant_ids": [
+        6
+      ],
+      "answer_starts": [
+        24,
+        24,
+        24
+      ],
+      "retrieved": [
+        [
+          0,
+          0.3971232581557528
+        ]
+      ],
+      "hit": false,
+      "exact_hit": true,
+      "abstained": false
+    },
+    {
+      "id": "56be5523acb8001400a5032c",
+      "question": "When was Levi's Stadium awarded the right to host Super Bowl 50?",
+      "answers": [
+        "May 21, 2013",
+        "May 21, 2013",
+        "May 21, 2013,"
+      ],
+      "relevant_ids": [
+        7
+      ],
+      "answer_starts": [
+        3,
+        3,
+        3
+      ],
+      "retrieved": [
+        [
+          7,
+          0.2593882760439097
+        ],
+        [
+          0,
+          0.3581601766241067
+        ],
+        [
+          6,
+          0.39058703331476285
+        ]
+      ],
+      "hit": true,
+      "exact_hit": true,
+      "abstained": false
+    },
+    {
+      "id": "56be572b3aeaaa14008c9052",
+      "question": "Who coached each Super Bowl 50 participant in their most recent Super Bowl appearance prior to Super Bowl 50?",
+      "answers": [
+        "John Fox",
+        "John Fox",
+        "Fox"
+      ],
+      "relevant_ids": [
+        8
+      ],
+      "answer_starts": [
+        636,
+        636,
+        641
+      ],
+      "retrieved": [],
+      "hit": false,
+      "exact_hit": false,
+      "abstained": true
+    },
+    {
+      "id": "56be59683aeaaa14008c9058",
+      "question": "Whic Carolina Panthers running back was waived?",
+      "answers": [
+        "DeAngelo Williams",
+        "DeAngelo Williams",
+        "Williams"
+      ],
+      "relevant_ids": [
+        9
+      ],
+      "answer_starts": [
+        38,
+        38,
+        47
+      ],
+      "retrieved": [],
+      "hit": false,
+      "exact_hit": true,
+      "abstained": true
+    },
+    {
+      "id": "56beb3a03aeaaa14008c9247",
+      "question": "How many Pro Bowlers were on the Panthers offense?",
+      "answers": [
+        "six",
+        "six",
+        "six"
+      ],
+      "relevant_ids": [
+        10
+      ],
+      "answer_starts": [
+        98,
+        98,
+        98
+      ],
+      "retrieved": [
+        [
+          11,
+          0.3886218371161382
+        ]
+      ],
+      "hit": false,
+      "exact_hit": true,
+      "abstained": false
+    },
+    {
+      "id": "56beb4343aeaaa14008c925b",
+      "question": "How many points did the Panthers defense surrender?",
+      "answers": [
+        "308",
+        "308",
+        "308"
+      ],
+      "relevant_ids": [
+        11
+      ],
+      "answer_starts": [
+        34,
+        34,
+        34
+      ],
+      "retrieved": [
+        [
+          49,
+          0.31896968462159225
+        ],
+        [
+          15,
+          0.34388009791196095
+        ],
+        [
+          50,
+          0.35463356031313586
+        ]
+      ],
+      "hit": false,
+      "exact_hit": false,
+      "abstained": false
+    },
+    {
+      "id": "56beb4e43aeaaa14008c9265",
+      "question": "Who is the head coach of the Broncos?",
+      "answers": [
+        "Gary Kubiak",
+        "Gary Kubiak",
+        "Kubiak"
+      ],
+      "relevant_ids": [
+        12
+      ],
+      "answer_starts": [
+        291,
+        291,
+        332
+      ],
+      "retrieved": [],
+      "hit": false,
+      "exact_hit": true,
+      "abstained": true
+    },
+    {
+      "id": "56beb57b3aeaaa14008c9279",
+      "question": "What was Peyton Manning's passer rating for the season?",
+      "answers": [
+        "67.9",
+        "67.9",
+        "67.9"
+      ],
+      "relevant_ids": [
+        13
+      ],
+      "answer_starts": [
+        44,
+        44,
+        44
+      ],
+      "retrieved": [
+        [
+          13,
+          0.3463128690100288
+        ],
+        [
+          12,
+          0.3898941818433874
+        ]
+      ],
+      "hit": true,
+      "exact_hit": true,
+      "abstained": false
+    },
+    {
+      "id": "56beb6533aeaaa14008c928d",
+      "question": "How many yards did the Broncos' defense give up?",
+      "answers": [
+        "4,530",
+        "4,530",
+        "4,530"
+      ],
+      "relevant_ids": [
+        14
+      ],
+      "answer_starts": [
+        60,
+        60,
+        60
+      ],
+      "retrieved": [
+        [
+          51,
+          0.3418394563324678
+        ],
+        [
+          49,
+          0.3680261399355633
+        ],
+        [
+          2,
+          0.3752021387948661
+        ]
+      ],
+      "hit": false,
+      "exact_hit": false,
+      "abstained": false
+    },
+    {
+      "id": "56beb6f23aeaaa14008c92a1",
+      "question": "Who lost to the Panthers in the divisional round of the playoffs?",
+      "answers": [
+        "Seattle Seahawks",
+        "the Seattle Seahawks",
+        "Seahawks"
+      ],
+      "relevant_ids": [
+        15
+      ],
+      "answer_starts": [
+        22,
+        18,
+        30
+      ],
+      "retrieved": [
+        [
+          15,
+          0.22852903670514324
+        ],
+        [
+          9,
+          0.37006186286635634
+        ]
+      ],
+      "hit": true,
+      "exact_hit": true,
+      "abstained": false
+    },
+    {
+      "id": "56beb7953aeaaa14008c92ab",
+      "question": "Who lost to the Broncos in the divisional round?",
+      "answers": [
+        "Pittsburgh Steelers",
+        "the Pittsburgh Steelers",
+        "Steelers"
+      ],
+      "relevant_ids": [
+        16
+      ],
+      "answer_starts": [
+        25,
+        21,
+        36
+      ],
+      "retrieved": [
+        [
+          16,
+          0.32188118326982873
+        ]
+      ],
+      "hit": true,
+      "exact_hit": true,
+      "abstained": false
+    },
+    {
+      "id": "56beb7fd3aeaaa14008c92b5",
+      "question": "What Carolina player was injured in the NFC Championship Game?",
+      "answers": [
+        "Thomas Davis",
+        "Thomas Davis,",
+        "Davis"
+      ],
+      "relevant_ids": [
+        17
+      ],
+      "answer_starts": [
+        39,
+        39,
+        46
+      ],
+      "retrieved": [
+        [
+          17,
+          0.33331288341159326
+        ]
+      ],
+      "hit": true,
+      "exact_hit": true,
+      "abstained": false
+    },
+    {
+      "id": "56beb86b3aeaaa14008c92bd",
+      "question": "How old was Peyton Manning when he played in Super Bowl 50?",
+      "answers": [
+        "39",
+        "39",
+        "39",
+        "39"
+      ],
+      "relevant_ids": [
+        18
+      ],
+      "answer_starts": [
+        172,
+        172,
+        172,
+        172
+      ],
+      "retrieved": [
+        [
+          18,
+          0.2513161500420644
+        ],
+        [
+          19,
+          0.3560825973129045
+        ]
+      ],
+      "hit": true,
+      "exact_hit": true,
+      "abstained": false
+    },
+    {
+      "id": "56beb90c3aeaaa14008c92c7",
+      "question": "When was Manning picked #1 in the NFL Draft?",
+      "answers": [
+        "1998",
+        "1998",
+        "1998"
+      ],
+      "relevant_ids": [
+        19
+      ],
+      "answer_starts": [
+        149,
+        149,
+        149
+      ],
+      "retrieved": [
+        [
+          19,
+          0.29523739872274146
+        ]
+      ],
+      "hit": true,
+      "exact_hit": true,
+      "abstained": false
+    },
+    {
+      "id": "56beb97c3aeaaa14008c92db",
+      "question": "In what Super Bowl did Rivera play?",
+      "answers": [
+        "Super Bowl XX",
+        "Super Bowl XX",
+        "XX"
+      ],
+      "relevant_ids": [
+        20
+      ],
+      "answer_starts": [
+        63,
+        63,
+        74
+      ],
+      "retrieved": [
+        [
+          20,
+          0.3303955771357694
+        ]
+      ],
+      "hit": true,
+      "exact_hit": true,
+      "abstained": false
+    },
+    {
+      "id": "56beba103aeaaa14008c92e5",
+      "question": "Who slipped on the Levi's Stadium turf in week 6 of the 2015 NFL season?",
+      "answers": [
+        "Justin Tucker",
+        "Justin Tucker",
+        "Tucker"
+      ],
+      "relevant_ids": [
+        21
+      ],
+      "answer_starts": [
+        320,
+        320,
+        327
+      ],
+      "retrieved": [
+        [
+          21,
+          0.3310890113536795
+        ]
+      ],
+      "hit": true,
+      "exact_hit": true,
+      "abstained": false
+    },
+    {
+      "id": "56bebad93aeaaa14008c92f9",
+      "question": "Who was designated as the home team in the Super Bowl?",
+      "answers": [
+        "Broncos",
+        "the Broncos",
+        "Broncos"
+      ],
+      "relevant_ids": [
+        22
+      ],
+      "answer_starts": [
+        82,
+        78,
+        82
+      ],
+      "retrieved": [
+        [
+          0,
+          0.39558413378215307
+        ]
+      ],
+      "hit": false,
+      "exact_hit": false,
+      "abstained": false
+    },
+    {
+      "id": "56bebb293aeaaa14008c9303",
+      "question": "At what university's facility did the Panthers practice?",
+      "answers": [
+        "San Jose State",
+        "San Jose State",
+        "San Jose State"
+      ],
+      "relevant_ids": [
+        23
+      ],
+      "answer_starts": [
+        22,
+        22,
+        22
+      ],
+      "retrieved": [
+        [
+          23,
+          0.26874529976724293
+        ]
+      ],
+      "hit": true,
+      "exact_hit": true,
+      "abstained": false
+    },
+    {
+      "id": "56bebbbf3aeaaa14008c9315",
+      "question": "When did the NFL announce the suspension of using Roman numerals to brand the Super Bowl?",
+      "answers": [
+        "June 4, 2014",
+        "On June 4, 2014",
+        "2014"
+      ],
+      "relevant_ids": [
+        24
+      ],
+      "answer_starts": [
+        3,
+        0,
+        11
+      ],
+      "retrieved": [
+        [
+          24,
+          0.22966658490866854
+        ]
+      ],
+      "hit": true,
+      "exact_hit": true,
+      "abstained": false
+    }
+  ],
+  "negative_controls": [
+    {
+      "question": "What is the secret password to my personal bank account?",
+      "abstained": true,
+      "retrieved": []
+    },
+    {
+      "question": "What will my unpublished diary entry say tomorrow?",
+      "abstained": true,
+      "retrieved": []
+    },
+    {
+      "question": "What is the current temperature inside my refrigerator?",
+      "abstained": true,
+      "retrieved": []
+    }
+  ],
+  "limitations": "Retrieval evaluation only; does not score generation faithfulness. Threshold fixed before evaluation. Small non-random sample; no population-level claim."
+}

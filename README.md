@@ -81,6 +81,8 @@ The benchmark compares both custom indexes with exact brute force. Each corpus s
 
 `reports/benchmark.csv` is flushed after each configuration. `reports/recall_latency.png` plots recall against median latency, labels ef, and uses separate curves for M. The script records environment details and can run with `--skip-kdtree` only when explicitly requested; omitted configurations must not be represented as measured. For less noisy results, set `OPENBLAS_NUM_THREADS=1` and `OMP_NUM_THREADS=1` in your shell before running and record the hardware. Do not compare results from different machines as if they were controlled.
 
+An optional `scripts.build_stream` command can consume the ordered embedding batch files while preparation is running. `scripts.benchmark --prebuilt-dir PATH` reuses its saved graphs after checking the corpus hash. In this mode, reported build seconds are the sum of timed insertion batches, excluding waits for embeddings and snapshot writes. The default benchmark builds indexes directly.
+
 Python spends time on heap operations, sets, dictionaries, recursion, neighbor selection, and many small NumPy allocations. NumPy accelerates distance arithmetic but does not remove those graph-traversal costs. Increasing M can improve connectivity but costs build time, memory, and neighbor evaluation. Increasing ef typically raises recall and query time; the actual tradeoff depends on the data. A 100k-vector graph in this implementation can be slow to build. The vectorized exact baseline may win at small N or when approximate recall requirements are high.
 
 Measured results and any outstanding runs are documented in [reports/RESULTS.md](reports/RESULTS.md). No performance numbers should be inferred from the example commands.
