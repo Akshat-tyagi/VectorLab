@@ -41,6 +41,7 @@ class BruteForce:
             raise ValueError("positive dimension and a supported metric required")
         self.dim, self.metric = dim, metric
         self.vectors: dict[int, NDArray] = {}
+        self._search_dirty = True
 
     def _vector(self, value: ArrayLike) -> NDArray:
         array = np.asarray(value, dtype=np.float64)
@@ -52,9 +53,20 @@ class BruteForce:
         if not isinstance(id, int) or isinstance(id, bool) or id in self.vectors:
             raise ValueError("ID must be a unique integer")
         self.vectors[id] = self._vector(vector)
+        self._search_dirty = True
 
     def delete(self, id: int) -> bool:
-        return self.vectors.pop(id, None) is not None
+        removed = self.vectors.pop(id, None) is not None
+        self._search_dirty |= removed
+        return removed
+
+    def build(self) -> None:
+        """Cache the contiguous reference matrix and norms outside query timing."""
+        self._search_ids = np.array(list(self.vectors), dtype=np.int64)
+        self._search_matrix = (np.stack(list(self.vectors.values())) if self.vectors
+                               else np.empty((0, self.dim)))
+        self._search_norms = np.linalg.norm(self._search_matrix, axis=1)
+        self._search_dirty = False
 
     def search(self, query: ArrayLike, k: int = 5, **_: object) -> list[Hit]:
         q = self._vector(query)
@@ -62,8 +74,15 @@ class BruteForce:
             raise ValueError("k must be a positive integer")
         if not self.vectors:
             return []
-        ids = np.array(list(self.vectors), dtype=np.int64)
-        ds = distances(np.stack(list(self.vectors.values())), q, self.metric)
+        if self._search_dirty:
+            self.build()
+        ids = self._search_ids
+        if self.metric == "cosine":
+            norms = self._search_norms * np.linalg.norm(q)
+            similarity = np.divide(self._search_matrix @ q, norms, out=np.zeros(len(ids)), where=norms > 0)
+            ds = np.clip(1 - similarity, 0, 2)
+        else:
+            ds = distances(self._search_matrix, q, self.metric)
         order = np.lexsort((ids, ds))[:k]
         return [(int(ids[i]), float(ds[i])) for i in order]
 

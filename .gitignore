@@ -26,4 +26,5 @@ __pycache__/
 data/*
 !data/.gitkeep
 reports/*.npz
+reports/**/*.npz
 reports/matplotlib-cache/

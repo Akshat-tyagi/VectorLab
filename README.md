@@ -45,7 +45,7 @@ restored = HNSW.load("data/example.npz")
 
 All indexes support Euclidean, Manhattan, and cosine **distance** (smaller is better), finite vectors, arbitrary unique integer IDs, and explicit dimension validation. Cosine distance to a zero vector is defined as 1, including zero against zero. Repeated vectors are allowed; repeated IDs are rejected. Deleted HNSW IDs are reserved until compaction. `k` larger than the live population returns at most that population; empty indexes return an empty list. Nonpositive `k` is rejected.
 
-* **BruteForce** vectorizes distance calculations and returns exact neighbors sorted by distance then ID. It stacks stored rows for each query; its timings include this cost. Sorting is O(N log N), so this is a transparent reference baseline rather than a heavily optimized BLAS benchmark.
+* **BruteForce** caches a contiguous matrix and vector norms, vectorizes distance calculations, and returns exact neighbors sorted by distance then ID. Cache construction is outside benchmark query timing. Sorting is O(N log N); selection is not optimized with partitioning.
 * **KDTree** builds a balanced median tree and performs exact branch-and-bound search. Euclidean and Manhattan use axis-distance bounds. Cosine uses unit-normalized vectors and the bound `axis_difference² / 2`; zero vectors are handled separately. Mutations trigger a lazy rebuild. At high dimensions, pruning often fails and Python recursion/NumPy call overhead can make it slower than brute force. No logarithmic query-time guarantee is claimed.
 * **HNSW** assigns exponentially distributed random levels, performs greedy upper-layer descent and beam search at the base, and selects diverse neighbors. `M` limits upper-layer neighbors; the base limit is `2*M`. `ef_construction` controls insertion search breadth; query `ef` controls recall/latency. It is approximate, with no universal recall or complexity guarantee. Deletions remain traversable tombstones to preserve routes. `compact()` rebuilds live nodes; many tombstones increase search work.
 
@@ -111,6 +111,8 @@ Interactive request/response documentation: <http://127.0.0.1:8080/docs>. The de
 | POST | `/ask` | Same input; retrieve evidence, then generate with Ollama |
 
 For generation, run Ollama with `ollama pull llama3.2`. `/ask` returns `abstained: true` and a clear no-evidence response when retrieval finds nothing within the threshold; it does not invoke the LLM in that case. With evidence, the prompt requests evidence-only answers and citations, but prompts cannot guarantee model faithfulness.
+
+To start the API with a few thousand prepared real documents without embedding them twice, run `python -m scripts.ingest_data --limit 3000` before starting the server. The import refuses to overwrite an existing snapshot. Use the same embedding backend/model for data preparation and the server.
 
 Document insertion uses 250-word chunks with 30-word overlap. All chunk embeddings are generated and validated before mutation, preventing partial inserts after an embedding failure. Graph, text, IDs, and model identity share one atomic snapshot, and startup reloads them. Persistence failure raises an error; mutations are not rolled back in memory on disk failure. The document store serializes index access with a lock. Use **one API worker**, because multiple worker processes would have independent memory and could overwrite the snapshot. The core index classes themselves are not thread-safe.
 

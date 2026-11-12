@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import os
 import platform
@@ -37,6 +38,7 @@ def main() -> None:
     parser.add_argument("--queries", type=int, default=100)
     parser.add_argument("--k", type=int, default=10)
     parser.add_argument("--output", type=Path, default=Path("reports"))
+    parser.add_argument("--prebuilt-dir", type=Path, help="Reuse hash-verified graphs from build_stream")
     parser.add_argument("--skip-kdtree", action="store_true", help="Explicitly omit expensive high-dimensional exact KD-tree")
     args = parser.parse_args()
     if args.queries < 1 or args.k < 1 or any(n < args.k for n in args.sizes):
@@ -50,7 +52,8 @@ def main() -> None:
                 "processor": platform.processor(), "cpu_count": os.cpu_count(), "dim": matrix.shape[1],
                 "queries": len(queries), "k": args.k, "metric": "cosine", "seed": 42,
                 "threads": {key: os.getenv(key) for key in ["OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS"]},
-                "data_path": str(args.data), "arguments": vars(args) | {"data": str(args.data), "output": str(args.output)}}
+                "data_path": str(args.data), "arguments": {key: str(value) if isinstance(value, Path) else value
+                                                            for key, value in vars(args).items()}}
     provenance_path = args.data.with_suffix(".json")
     if provenance_path.exists():
         provenance = json.loads(provenance_path.read_text(encoding="utf-8"))
@@ -67,6 +70,7 @@ def main() -> None:
             start = time.perf_counter()
             for id, row in enumerate(matrix[:n]):
                 oracle.insert(id, row)
+            oracle.build()
             bf_build = time.perf_counter() - start
             truth = [set(dict(oracle.search(q, args.k))) for q in queries]
             def record(index, algorithm, build_seconds, M="", ef=""):
@@ -89,15 +93,25 @@ def main() -> None:
                 tree.build()  # Never charge lazy construction to first-query latency.
                 record(tree, "kdtree", time.perf_counter() - start)
             for m in args.m:
-                index = HNSW(matrix.shape[1], M=m, ef_construction=args.ef_construction)
                 checkpoint = args.output / f"hnsw-n{n}-m{m}-efc{args.ef_construction}.npz"
-                start = time.perf_counter()
-                for id, row in enumerate(matrix[:n]):
-                    index.insert(id, row)
-                    if (id + 1) % 1000 == 0:
-                        print(f"HNSW n={n} M={m}: {id + 1} inserted", flush=True)
-                build_seconds = time.perf_counter() - start
-                index.save(checkpoint)
+                if args.prebuilt_dir:
+                    source = args.prebuilt_dir / checkpoint.name
+                    info = json.loads(source.with_suffix(".json").read_text(encoding="utf-8"))
+                    if info["vector_sha256"] != hashlib.sha256(memoryview(np.ascontiguousarray(matrix[:n], dtype=np.float64))).hexdigest():
+                        raise ValueError("prebuilt graph corpus hash does not match benchmark data")
+                    index = HNSW.load(source)
+                    if index.M != m or index.ef_construction != args.ef_construction or len(index.vectors) != n:
+                        raise ValueError("prebuilt graph parameters differ")
+                    build_seconds = info["build_seconds"]
+                else:
+                    index = HNSW(matrix.shape[1], M=m, ef_construction=args.ef_construction)
+                    start = time.perf_counter()
+                    for id, row in enumerate(matrix[:n]):
+                        index.insert(id, row)
+                        if (id + 1) % 1000 == 0:
+                            print(f"HNSW n={n} M={m}: {id + 1} inserted", flush=True)
+                    build_seconds = time.perf_counter() - start
+                    index.save(checkpoint)
                 for ef in args.ef:
                     record(index, "hnsw", build_seconds, m, ef)
 
