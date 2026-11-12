@@ -15,6 +15,18 @@ import numpy as np
 from vectorlab import BruteForce, HNSW, KDTree
 
 
+def cpu_description() -> str:
+    name = platform.processor()
+    if name:
+        return name
+    info = Path("/proc/cpuinfo")
+    if info.exists():
+        for line in info.read_text(encoding="utf-8").splitlines():
+            if line.startswith("model name"):
+                return line.split(":", 1)[1].strip()
+    return os.getenv("PROCESSOR_IDENTIFIER", "unknown")
+
+
 def measure(index, queries, truth, k, ef=50):
     for query in queries[:3]:
         index.search(query, k, ef=ef)
@@ -49,7 +61,7 @@ def main() -> None:
         parser.error("dataset lacks requested vectors or queries; run prepare_data first")
     args.output.mkdir(parents=True, exist_ok=True)
     metadata = {"python": platform.python_version(), "numpy": np.__version__, "platform": platform.platform(),
-                "processor": platform.processor(), "cpu_count": os.cpu_count(), "dim": matrix.shape[1],
+                "processor": cpu_description(), "cpu_count": os.cpu_count(), "dim": matrix.shape[1],
                 "queries": len(queries), "k": args.k, "metric": "cosine", "seed": 42,
                 "threads": {key: os.getenv(key) for key in ["OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS"]},
                 "data_path": str(args.data), "arguments": {key: str(value) if isinstance(value, Path) else value

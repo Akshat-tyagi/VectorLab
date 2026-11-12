@@ -18,12 +18,13 @@ def main():
     figure, axes = plt.subplots(1, len(sizes), figsize=(6 * len(sizes), 4), squeeze=False)
     for axis, n in zip(axes[0], sizes):
         selected = [row for row in rows if int(row["n"]) == n]
-        for m in sorted({row["M"] for row in selected if row["algorithm"] == "hnsw"}):
+        for curve, m in enumerate(sorted({row["M"] for row in selected if row["algorithm"] == "hnsw"}, key=int)):
             points = sorted([row for row in selected if row["M"] == m], key=lambda row: int(row["ef"]))
             x, y = [float(r["p50_ms"]) for r in points], [float(r["recall_at_k"]) for r in points]
             axis.plot(x, y, "o-", label=f"HNSW M={m}")
             for row, px, py in zip(points, x, y):
-                axis.annotate(f"ef={row['ef']}", (px, py), xytext=(3, 5), textcoords="offset points", fontsize=8)
+                axis.annotate(f"ef={row['ef']}", (px, py), xytext=(3, -14 if curve % 2 == 0 else 7),
+                              textcoords="offset points", fontsize=8)
         for row in selected:
             if row["algorithm"] != "hnsw":
                 axis.scatter(float(row["p50_ms"]), float(row["recall_at_k"]), marker="x", label=row["algorithm"])
