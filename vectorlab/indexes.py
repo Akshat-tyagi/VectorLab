@@ -12,7 +12,7 @@ import math
 import os
 import tempfile
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Self, cast
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -109,7 +109,7 @@ class BruteForce:
                 os.unlink(temporary)
 
     @classmethod
-    def load(cls, path: str | Path) -> BruteForce:
+    def load(cls, path: str | Path) -> Self:
         with np.load(path, allow_pickle=False) as archive:
             state = json.loads(str(archive["metadata"]))
             matrix = archive["vectors"].copy()
@@ -131,7 +131,7 @@ class BruteForce:
             index.rng.bit_generator.state = state["rng"]
             for id, row in index.vectors.items():
                 index._cache(id, row)
-        return index
+        return cast(Self, index)
 
 
 class KDTree(BruteForce):
@@ -358,9 +358,3 @@ class HNSW(BruteForce):
                 "seed": self.seed}, "graph": self.graph, "entry": self.entry,
                 "deleted": sorted(self.deleted), "rng": self.rng.bit_generator.state}
 
-    @classmethod
-    def load(cls, path: str | Path) -> HNSW:
-        index = super().load(path)
-        with np.load(path, allow_pickle=False) as archive:
-            index.deleted = set(json.loads(str(archive["metadata"]))["deleted"])
-        return index

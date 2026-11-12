@@ -12,7 +12,7 @@ Use Python 3.11 or newer; Python 3.11 or 3.12 is recommended for the broadest ML
 python -m venv .venv
 ```
 
-Activate on macOS/Linux with `source .venv/bin/activate`, on Windows PowerShell with `.venv\\Scripts\\Activate.ps1`, or in Windows Command Prompt with `.venv\\Scripts\\activate.bat`. Alternatively, invoke the virtual environment's Python executable directly if activation is restricted.
+Activate on macOS/Linux with `source .venv/bin/activate`, on Windows PowerShell with `.venv\Scripts\Activate.ps1`, or in Windows Command Prompt with `.venv\Scripts\activate.bat`. Alternatively, invoke the virtual environment's Python executable directly if activation is restricted.
 
 ```sh
 python -m pip install --upgrade pip
@@ -131,7 +131,7 @@ scripts/prepare_data.py    Download and encode real datasets
 scripts/benchmark.py       Recall, latency, build time and snapshot size
 scripts/evaluate_rag.py    Answer-labeled retrieval evaluation
 scripts/plot_results.py    Chart from measured CSV
- tests/                    Correctness, persistence and API tests
+tests/                    Correctness, persistence and API tests
 reports/                   Measured artifacts and limitations
 ```
 
