@@ -35,7 +35,7 @@
         <form id="search-form" class="panel query-panel">
           <label for="search-question">What are you looking for?</label>
           <textarea id="search-question" rows="3" maxlength="4000" required placeholder="Try a topic or question, like ‘How are companies using artificial intelligence?’"></textarea>
-          <div class="form-bottom"><label class="inline-label" for="search-k">Results <select id="search-k"><option value="3">Top 3</option><option value="5" selected>Top 5</option><option value="10">Top 10</option></select></label><button class="primary" type="submit">Search documents <span aria-hidden="true">↗</span></button></div>
+          <div class="form-bottom"><label class="inline-label" for="search-algorithm">Algorithm <select id="search-algorithm"><option value="hnsw">HNSW (approximate)</option><option value="kd-tree">KD-tree (exact)</option><option value="brute-force">Brute force (exact)</option></select></label><label class="inline-label" for="search-k">Results <select id="search-k"><option value="3">Top 3</option><option value="5" selected>Top 5</option><option value="10">Top 10</option></select></label><button class="primary" type="submit">Search documents <span aria-hidden="true">↗</span></button></div>
         </form>
         <div class="results-heading"><h3>Matching passages</h3><span id="search-summary" class="subtle">Ready when you are</span></div>
         <div id="search-results" class="results"><div class="empty-state"><span class="empty-icon" aria-hidden="true">⌕</span><h3>Start with a question.</h3><p>Search finds passages with a similar meaning in your stored documents.</p></div></div>

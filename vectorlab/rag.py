@@ -4,13 +4,15 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from threading import RLock
-from typing import Callable
+from typing import Callable, Literal
 
 import numpy as np
 
 from .embeddings import Embedder
 from .generation import generate
-from .indexes import HNSW
+from .indexes import BruteForce, HNSW, KDTree
+
+SearchAlgorithm = Literal["hnsw", "kd-tree", "brute-force"]
 
 
 def chunks(text: str, size: int = 250, overlap: int = 30) -> list[str]:
@@ -34,6 +36,7 @@ class DocumentStore:
         self.documents: dict[int, dict] = {}
         self.next_id = 1
         self.lock = RLock()
+        self._search_indexes: dict[str, BruteForce] = {}
         if path.exists():
             self.index = HNSW.load(path)
             with np.load(path, allow_pickle=False) as archive:
@@ -61,6 +64,7 @@ class DocumentStore:
                 self.index = HNSW(vectors.shape[1])
             if vectors.shape[1] != self.index.dim:
                 raise ValueError("embedding dimension changed")
+            self._search_indexes.clear()
             ids = []
             for position, (piece, vector) in enumerate(zip(pieces, vectors)):
                 id = self.next_id
@@ -76,12 +80,15 @@ class DocumentStore:
         with self.lock:
             if id not in self.documents:
                 return False
+            self._search_indexes.clear()
             self.index.delete(id)
             del self.documents[id]
             self.save()
             return True
 
-    def retrieve(self, question: str, k: int = 3) -> list[dict]:
+    def retrieve(self, question: str, k: int = 3, algorithm: SearchAlgorithm = "hnsw") -> list[dict]:
+        if algorithm not in ("hnsw", "kd-tree", "brute-force"):
+            raise ValueError("unknown search algorithm")
         if not question.strip() or k < 1:
             raise ValueError("question and positive k required")
         with self.lock:
@@ -89,7 +96,18 @@ class DocumentStore:
                 return []
         query = self.embedder.encode([question])[0]
         with self.lock:
-            hits = self.index.search(query, k, ef=max(50, k))
+            selected = self.index
+            if algorithm != "hnsw":
+                if algorithm not in self._search_indexes:
+                    index_class = KDTree if algorithm == "kd-tree" else BruteForce
+                    alternate = index_class(self.index.dim, metric=self.index.metric)
+                    # Copy only live chunks, reusing persisted embeddings without re-encoding.
+                    for id in self.documents:
+                        alternate.insert(id, self.index.vectors[id])
+                    alternate.build()
+                    self._search_indexes[algorithm] = alternate
+                selected = self._search_indexes[algorithm]
+            hits = selected.search(query, k, ef=max(50, k))
             return [{**self.documents[id], "distance": distance} for id, distance in hits
                     if distance <= self.max_distance]
 

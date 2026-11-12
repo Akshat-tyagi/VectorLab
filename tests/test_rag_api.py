@@ -86,3 +86,34 @@ def test_changed_model_rejected_on_restart(tmp_path):
         model = "different-model"
     with pytest.raises(ValueError, match="embedding model"):
         DocumentStore(path, ChangedModel())
+
+
+@pytest.mark.parametrize("algorithm", ["hnsw", "kd-tree", "brute-force"])
+def test_search_algorithm_lifecycle(tmp_path, algorithm):
+    path = tmp_path / "algorithms.npz"
+    client = TestClient(create_app(path, FakeEmbedder()))
+    query = {"question": "tree", "k": 10, "algorithm": algorithm}
+    assert client.post("/search", json=query).json()["contexts"] == []
+    first = client.post("/documents", json={"title": "First", "text": "tree"}).json()["ids"][0]
+    client.post("/documents", json={"title": "Irrelevant", "text": "other"})
+    result = client.post("/search", json=query)
+    assert result.status_code == 200
+    assert result.json()["algorithm"] == algorithm
+    assert [c["id"] for c in result.json()["contexts"]] == [first]
+    if algorithm != "hnsw":
+        from vectorlab.indexes import BruteForce, KDTree
+        assert type(client.app.state.store._search_indexes[algorithm]) is (
+            KDTree if algorithm == "kd-tree" else BruteForce)
+    second = client.post("/documents", json={"title": "Duplicate", "text": "tree"}).json()["ids"][0]
+    assert {c["id"] for c in client.post("/search", json=query).json()["contexts"]} == {first, second}
+    client.delete(f"/documents/{first}")
+    assert [c["id"] for c in client.post("/search", json=query).json()["contexts"]] == [second]
+    restarted = TestClient(create_app(path, FakeEmbedder()))
+    assert [c["id"] for c in restarted.post("/search", json=query).json()["contexts"]] == [second]
+
+
+def test_search_algorithm_validation_and_default(tmp_path):
+    client = TestClient(create_app(tmp_path / "validation.npz", FakeEmbedder()))
+    assert client.post("/search", json={"question": "tree"}).json()["algorithm"] == "hnsw"
+    for algorithm in ["invalid", None, 42]:
+        assert client.post("/search", json={"question": "tree", "algorithm": algorithm}).status_code == 422

@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 from .generation import GenerationError, GroqGenerator
 
 from .embeddings import Embedder, create_embedder
-from .rag import DocumentStore
+from .rag import DocumentStore, SearchAlgorithm
 
 
 class DocumentInput(BaseModel):
@@ -26,6 +26,10 @@ class QueryInput(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
     question: str = Field(min_length=1, max_length=4000)
     k: int = Field(default=3, ge=1, le=100, strict=True)
+
+
+class SearchInput(QueryInput):
+    algorithm: SearchAlgorithm = "hnsw"
 
 
 def create_app(path: Path | None = None, embedder: Embedder | None = None) -> FastAPI:
@@ -76,8 +80,9 @@ def create_app(path: Path | None = None, embedder: Embedder | None = None) -> Fa
         return {"deleted": id}
 
     @app.post("/search")
-    def search(body: QueryInput) -> dict:
-        return {"contexts": store.retrieve(body.question, body.k)}
+    def search(body: SearchInput) -> dict:
+        return {"contexts": store.retrieve(body.question, body.k, body.algorithm),
+                "algorithm": body.algorithm}
 
     @app.post("/ask")
     def ask(body: QueryInput) -> dict:

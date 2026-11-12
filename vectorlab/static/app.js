@@ -130,8 +130,9 @@ $('search-form').addEventListener('submit', (event) => {
     const results = $('search-results');
     results.replaceChildren(element('p', 'busy', 'Finding relevant passages…'));
     try {
-      const data = await post('/search', { question, k });
-      $('search-summary').textContent = `${data.contexts.length} matching passage${data.contexts.length === 1 ? '' : 's'} · lower distance is closer`;
+      const algorithm = $('search-algorithm').value;
+      const data = await post('/search', { question, k, algorithm });
+      $('search-summary').textContent = `${data.contexts.length} matching passage${data.contexts.length === 1 ? '' : 's'} · ${{ hnsw: 'HNSW', 'kd-tree': 'KD-tree', 'brute-force': 'Brute force' }[data.algorithm]} · lower distance is closer`;
       if (!data.contexts.length) empty(results, 'No relevant passage found.', 'Try rephrasing your question or add a document about this topic.');
       else results.replaceChildren(...data.contexts.map((context, index) => passageCard(context, index)));
     } catch (error) { empty(results, 'Search could not finish.', 'Check the message above and try again.'); throw error; }

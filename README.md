@@ -107,7 +107,7 @@ Only answer generation uses Groq Cloud. Questions and retrieved source passages 
 python -m uvicorn vectorlab.api:create_app --factory --host 127.0.0.1 --port 8080
 ```
 
-Open **<http://127.0.0.1:8080/>** for the frontend. Use **Semantic search** to find relevant passages, **Documents** to add, filter, browse, and delete stored chunks, and **Ask AI** to get an answer with its retrieved sources. The interface includes loading states, empty-result messages, and error feedback. It uses the same server as the API; no frontend installation or build step is needed.
+Open **<http://127.0.0.1:8080/>** for the frontend. Use **Semantic search** to find relevant passages with a choice of HNSW (approximate), KD-tree (exact), or brute force (exact), **Documents** to add, filter, browse, and delete stored chunks, and **Ask AI** to get an answer with its retrieved sources. The interface includes loading states, empty-result messages, and error feedback. It uses the same server as the API; no frontend installation or build step is needed.
 
 Interactive request/response documentation remains available at <http://127.0.0.1:8080/docs>. The default sentence-transformer embedding model downloads on first startup. No Ollama or local answer-generation model is needed. `VECTORLAB_SNAPSHOT` selects the snapshot path (default `data/documents.npz`); `VECTORLAB_MAX_DISTANCE` sets the relevance threshold (default 0.4).
 
@@ -117,12 +117,14 @@ Interactive request/response documentation remains available at <http://127.0.0.
 | POST | `/documents` | `{"title":"Graph notes","text":"A tree is a connected graph without cycles."}` |
 | GET | `/documents` | Stored document chunks |
 | DELETE | `/documents/{id}` | Delete a chunk and persist |
-| POST | `/search` | `{"question":"What is a tree?","k":3}` |
+| POST | `/search` | `{"question":"What is a tree?","k":3,"algorithm":"hnsw"}`; also `kd-tree` or `brute-force` |
 | POST | `/ask` | Same input; retrieve evidence, then generate with Groq |
 
 For generation, configure `GROQ_API_KEY` in `.env`. `/ask` returns `abstained: true` and a clear no-evidence response when retrieval finds nothing within the threshold; it does not invoke the LLM in that case. With evidence, the prompt requests evidence-only answers and citations, but prompts cannot guarantee model faithfulness.
 
 To start the API with a few thousand prepared real documents without embedding them twice, run `python -m scripts.ingest_data --limit 3000` before starting the server. The import refuses to overwrite an existing snapshot. Use the same embedding model for data preparation and the server.
+
+Semantic search defaults to HNSW. Alternate indexes reuse the same stored vectors and cosine threshold. They are built on first use, cached, and invalidated after insertion or deletion; the first query after a change includes rebuild time. KD-tree can be slower than brute force for high-dimensional embeddings. Ask AI continues to use HNSW.
 
 Document insertion uses 250-word chunks with 30-word overlap. All chunk embeddings are generated and validated before mutation, preventing partial inserts after an embedding failure. Graph, text, IDs, and model identity share one atomic snapshot, and startup reloads them. Persistence failure raises an error; mutations are not rolled back in memory on disk failure. The document store serializes index access with a lock. Use **one API worker**, because multiple worker processes would have independent memory and could overwrite the snapshot. The core index classes themselves are not thread-safe.
 
