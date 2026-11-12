@@ -1,0 +1,12 @@
+{
+  "real_documents": 3000,
+  "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+  "search_status": 200,
+  "self_query_retrieved_original": true,
+  "restart_preserved_results": true,
+  "returned_ids": [
+    1,
+    2110
+  ],
+  "generation_tested": false
+}

@@ -71,6 +71,12 @@ def test_validation(kind):
     for k in [0, -1, True]:
         with pytest.raises(ValueError):
             index.search([1, 2], k)
+    for id in [True, 1.5, 2**63, -(2**63) - 1]:
+        with pytest.raises(ValueError):
+            index.insert(id, [1, 2])
+    for dim in [0, -1, True, 1.5]:
+        with pytest.raises(ValueError):
+            kind(dim)
 
 
 def test_hnsw_recall_and_graph_roundtrip(tmp_path):

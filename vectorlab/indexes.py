@@ -37,7 +37,7 @@ class BruteForce:
     """Mutable exact baseline; stable ordering by (distance, external ID)."""
 
     def __init__(self, dim: int, metric: Metric = "cosine", **_: object):
-        if dim < 1 or metric not in METRICS:
+        if not isinstance(dim, int) or isinstance(dim, bool) or dim < 1 or metric not in METRICS:
             raise ValueError("positive dimension and a supported metric required")
         self.dim, self.metric = dim, metric
         self.vectors: dict[int, NDArray] = {}
@@ -50,8 +50,9 @@ class BruteForce:
         return array.copy()
 
     def insert(self, id: int, vector: ArrayLike) -> None:
-        if not isinstance(id, int) or isinstance(id, bool) or id in self.vectors:
-            raise ValueError("ID must be a unique integer")
+        if (not isinstance(id, int) or isinstance(id, bool) or not -(2**63) <= id < 2**63
+                or id in self.vectors):
+            raise ValueError("ID must be a unique signed 64-bit integer")
         self.vectors[id] = self._vector(vector)
         self._search_dirty = True
 
@@ -225,7 +226,8 @@ class HNSW(BruteForce):
     def __init__(self, dim: int, metric: Metric = "cosine", M: int = 16,
                  ef_construction: int = 100, seed: int = 42, **kwargs: object):
         super().__init__(dim, metric)
-        if M < 2 or ef_construction < M:
+        if (not isinstance(M, int) or isinstance(M, bool) or not isinstance(ef_construction, int)
+                or isinstance(ef_construction, bool) or M < 2 or ef_construction < M):
             raise ValueError("M >= 2 and ef_construction >= M required")
         self.M, self.ef_construction, self.seed = M, ef_construction, seed
         self.rng = np.random.default_rng(seed)

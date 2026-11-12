@@ -13,12 +13,14 @@ def main() -> None:
         rows = list(csv.DictReader(stream))
     rag = json.loads((args.reports / "rag.json").read_text(encoding="utf-8"))
     environment = json.loads((args.reports / "benchmark_environment.json").read_text(encoding="utf-8"))
+    k, query_count, dim = environment["k"], environment["queries"], environment["dim"]
+    model = environment.get("dataset", {}).get("model", rag["model"])
     lines = ["# Measured results", "", "These are measurements from this checkout, not target numbers or simulated timings.", "",
-             "## Search", "", "AG News documents encoded with all-MiniLM-L6-v2 (384 dimensions). "
-             "100 held-out AG News test documents serve as queries; k=10, cosine distance, seed=42, ef_construction=100. "
+             "## Search", "", f"AG News documents encoded with {model} ({dim} dimensions). "
+             f"{query_count} held-out AG News test documents serve as queries; k={k}, cosine distance, seed=42, ef_construction=100. "
              "Exact brute-force top-k IDs define recall. Index construction and embedding inference are outside query timing. "
              "Three warmups precede each configuration. The brute-force baseline caches its matrix and norms.", "",
-             "| Vectors | Index | M | ef | Recall@10 | Median ms | p95 ms | Build s |", "|---:|---|---:|---:|---:|---:|---:|---:|"]
+             f"| Vectors | Index | M | ef | Recall@{k} | Median ms | p95 ms | Build s |", "|---:|---|---:|---:|---:|---:|---:|---:|"]
     for row in rows:
         lines.append(f"| {int(row['n']):,} | {row['algorithm']} | {row['M'] or '—'} | {row['ef'] or '—'} | "
                      f"{float(row['recall_at_k']):.3f} | {float(row['p50_ms']):.3f} | {float(row['p95_ms']):.3f} | "
