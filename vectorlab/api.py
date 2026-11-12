@@ -5,6 +5,8 @@ import os
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field
 
 from .embeddings import Embedder, create_embedder
@@ -34,6 +36,12 @@ def create_app(path: Path | None = None, embedder: Embedder | None = None) -> Fa
     app = FastAPI(title="VectorLab NumPy", version="0.1.0",
                   description="Local document retrieval with a hand-built HNSW index")
     app.state.store = store
+    static = Path(__file__).with_name("static")
+    app.mount("/static", StaticFiles(directory=static), name="static")
+
+    @app.get("/", include_in_schema=False)
+    def frontend() -> FileResponse:
+        return FileResponse(static / "index.html")
 
     @app.exception_handler(ValueError)
     async def invalid_value(request, exc):

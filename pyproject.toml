@@ -16,6 +16,9 @@ test = ["pytest>=8,<10", "httpx>=0.27,<1"]
 [tool.setuptools.packages.find]
 include = ["vectorlab*"]
 
+[tool.setuptools.package-data]
+vectorlab = ["static/*"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]

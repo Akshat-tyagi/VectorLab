@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Search your documents and ask questions with VectorLab NumPy.">
+  <title>VectorLab · Document workspace</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="/" aria-label="VectorLab home"><span class="brand-mark" aria-hidden="true">V<span>·</span></span><span>VectorLab<small>NUMPY EDITION</small></span></a>
+    <div class="nav-label">WORKSPACE</div>
+    <nav aria-label="Workspace navigation">
+      <button class="nav-item active" data-view="search" aria-current="page"><span aria-hidden="true">⌕</span> Semantic search</button>
+      <button class="nav-item" data-view="documents"><span aria-hidden="true">▤</span> Documents</button>
+      <button class="nav-item" data-view="ask"><span aria-hidden="true">✳</span> Ask AI</button>
+    </nav>
+    <div class="sidebar-bottom"><span class="connection" id="connection">Connecting…</span><p>Your documents, on your machine.</p><a href="/docs" target="_blank" rel="noopener">API documentation ↗</a></div>
+  </aside>
+  <main>
+    <header class="topbar"><span>Document workspace</span><span class="local-pill"><span aria-hidden="true">●</span> LOCAL INSTANCE</span></header>
+    <div class="workspace">
+      <div class="page-intro"><p class="eyebrow">A LITTLE LESS SEARCHING. A LITTLE MORE FINDING.</p><h1>Your knowledge, connected.</h1><p>Find the right passage, collect your notes, and put your documents to work.</p></div>
+      <section class="stats" aria-label="Index status">
+        <div><span class="stat-label">DOCUMENT CHUNKS</span><strong id="count">—</strong><span class="stat-note">stored in your index</span></div>
+        <div><span class="stat-label">VECTOR DIMENSIONS</span><strong id="dimensions">—</strong><span class="stat-note">real text embeddings</span></div>
+        <div class="model-stat"><span class="stat-label">EMBEDDING MODEL</span><strong id="model">Connecting…</strong><span class="stat-note">HNSW retrieval · cosine distance</span></div>
+      </section>
+      <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+
+      <section id="view-search" class="view" aria-labelledby="search-heading">
+        <div class="section-heading"><div><p class="eyebrow">01 / EXPLORE</p><h2 id="search-heading">Search by meaning.</h2></div><span class="subtle">Words don't have to match. Ideas do.</span></div>
+        <form id="search-form" class="panel query-panel">
+          <label for="search-question">What are you looking for?</label>
+          <textarea id="search-question" rows="3" maxlength="4000" required placeholder="Try a topic or question, like ‘How are companies using artificial intelligence?’"></textarea>
+          <div class="form-bottom"><label class="inline-label" for="search-k">Results <select id="search-k"><option value="3">Top 3</option><option value="5" selected>Top 5</option><option value="10">Top 10</option></select></label><button class="primary" type="submit">Search documents <span aria-hidden="true">↗</span></button></div>
+        </form>
+        <div class="results-heading"><h3>Matching passages</h3><span id="search-summary" class="subtle">Ready when you are</span></div>
+        <div id="search-results" class="results"><div class="empty-state"><span class="empty-icon" aria-hidden="true">⌕</span><h3>Start with a question.</h3><p>Search finds passages with a similar meaning in your stored documents.</p></div></div>
+      </section>
+
+      <section id="view-documents" class="view" aria-labelledby="documents-heading" hidden>
+        <div class="section-heading"><div><p class="eyebrow">02 / COLLECT</p><h2 id="documents-heading">A place for your knowledge.</h2></div></div>
+        <div class="document-layout">
+          <form id="document-form" class="panel add-panel">
+            <h3>Add a document</h3><p class="subtle">Paste notes, an article, or a useful reference.</p>
+            <label for="document-title">Title</label><input id="document-title" maxlength="500" required placeholder="e.g. My machine learning notes">
+            <label for="document-text">Document text</label><textarea id="document-text" rows="10" maxlength="200000" required placeholder="Paste your text here…"></textarea>
+            <p class="help">Long documents are split into overlapping chunks. Each chunk is embedded and saved automatically.</p>
+            <button type="submit" class="primary">Embed & save <span aria-hidden="true">+</span></button>
+          </form>
+          <div class="library"><div class="results-heading"><h3>Your library</h3><button id="refresh-documents" type="button" class="text-button">Refresh ↻</button></div><label class="sr-only" for="document-filter">Filter library</label><input id="document-filter" type="search" placeholder="Filter by title or text…"><p id="library-summary" class="subtle"></p><div id="document-list" class="results"></div><div class="pagination"><button id="previous-page" class="secondary" type="button">← Previous</button><span id="page-label" class="subtle"></span><button id="next-page" class="secondary" type="button">Next →</button></div></div>
+        </div>
+      </section>
+
+      <section id="view-ask" class="view" aria-labelledby="ask-heading" hidden>
+        <div class="section-heading"><div><p class="eyebrow">03 / UNDERSTAND</p><h2 id="ask-heading">Ask your documents.</h2></div><span class="subtle">Answers with their source passages.</span></div>
+        <form id="ask-form" class="panel query-panel">
+          <label for="ask-question">Your question</label><textarea id="ask-question" rows="3" maxlength="4000" required placeholder="What would you like to understand about your documents?"></textarea>
+          <div class="form-bottom"><label class="inline-label" for="ask-k">Sources <select id="ask-k"><option value="3" selected>Top 3</option><option value="5">Top 5</option><option value="10">Top 10</option></select></label><button class="primary" type="submit">Ask AI <span aria-hidden="true">✳</span></button></div>
+          <p class="help">Requires Ollama with llama3.2 for answers. If no relevant passage is found, the assistant will say so.</p>
+        </form>
+        <div id="answer-area" class="results"><div class="empty-state"><span class="empty-icon" aria-hidden="true">✳</span><h3>A conversation starts with curiosity.</h3><p>Ask a question to retrieve evidence and generate an answer from your documents.</p></div></div>
+      </section>
+      <footer>Built from the vectors up.<span>Python + NumPy · Local document retrieval</span></footer>
+    </div>
+  </main>
+</body>
+</html>

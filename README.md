@@ -1,6 +1,6 @@
 # VectorLab NumPy
 
-An inspectable Python vector database: hand-built HNSW, an exact KD-tree, a NumPy brute-force baseline, durable document retrieval, and reproducible evaluation on real text embeddings.
+An inspectable Python vector database: hand-built HNSW, an exact KD-tree, a NumPy brute-force baseline, durable document retrieval, a browser workspace, and reproducible evaluation on real text embeddings.
 
 The indexes are implemented directly in Python and NumPy without wrapping FAISS, hnswlib, or Chroma. This is an educational implementation, not a production database.
 
@@ -103,7 +103,9 @@ python -m scripts.evaluate_rag --k 3 --max-distance 0.4
 python -m uvicorn vectorlab.api:create_app --factory --host 127.0.0.1 --port 8080
 ```
 
-Interactive request/response documentation: <http://127.0.0.1:8080/docs>. The default sentence-transformer downloads on first startup. To use Ollama, set `VECTORLAB_BACKEND=ollama` and optionally `VECTORLAB_MODEL=nomic-embed-text` in your shell before starting. `VECTORLAB_SNAPSHOT` selects the snapshot path (default `data/documents.npz`); `VECTORLAB_MAX_DISTANCE` sets the relevance threshold (default 0.4).
+Open **<http://127.0.0.1:8080/>** for the frontend. Use **Semantic search** to find relevant passages, **Documents** to add, filter, browse, and delete stored chunks, and **Ask AI** to get an answer with its retrieved sources. The interface includes loading states, empty-result messages, and error feedback. It uses the same server as the API; no frontend installation or build step is needed.
+
+Interactive request/response documentation remains available at <http://127.0.0.1:8080/docs>. The default sentence-transformer downloads on first startup. To use Ollama, set `VECTORLAB_BACKEND=ollama` and optionally `VECTORLAB_MODEL=nomic-embed-text` in your shell before starting. `VECTORLAB_SNAPSHOT` selects the snapshot path (default `data/documents.npz`); `VECTORLAB_MAX_DISTANCE` sets the relevance threshold (default 0.4).
 
 | Method | Endpoint | Input / behavior |
 |---|---|---|
@@ -120,7 +122,7 @@ To start the API with a few thousand prepared real documents without embedding t
 
 Document insertion uses 250-word chunks with 30-word overlap. All chunk embeddings are generated and validated before mutation, preventing partial inserts after an embedding failure. Graph, text, IDs, and model identity share one atomic snapshot, and startup reloads them. Persistence failure raises an error; mutations are not rolled back in memory on disk failure. The document store serializes index access with a lock. Use **one API worker**, because multiple worker processes would have independent memory and could overwrite the snapshot. The core index classes themselves are not thread-safe.
 
-This is a local developer API: no authentication, replication, transactions, multi-process coordination, streaming LLM output, or web frontend is included. Keep the default localhost binding.
+This is a local developer application: no authentication, replication, transactions, multi-process coordination, or streaming LLM output is included. Keep the default localhost binding.
 
 ## Project map
 
@@ -129,6 +131,7 @@ vectorlab/indexes.py       NumPy metrics, brute force, KD-tree, HNSW, snapshots
 vectorlab/embeddings.py    Sentence-transformer and Ollama adapters
 vectorlab/rag.py           Chunking, persistent document store, retrieval and abstention
 vectorlab/api.py           FastAPI app factory and Pydantic inputs
+vectorlab/static/          Browser interface (HTML, CSS, JavaScript)
 scripts/prepare_data.py    Download and encode real datasets
 scripts/ingest_data.py     Seed the API with prepared real documents
 scripts/build_stream.py    Optional overlapping graph construction

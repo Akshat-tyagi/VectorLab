@@ -48,6 +48,11 @@ def test_rag_restart_and_abstention(tmp_path):
 def test_api_validation_and_restart(tmp_path):
     path = tmp_path / "api.npz"
     client = TestClient(create_app(path, FakeEmbedder()))
+    home = client.get("/")
+    assert home.status_code == 200 and "text/html" in home.headers["content-type"]
+    assert "Semantic search" in home.text
+    assert client.get("/static/app.js").status_code == 200
+    assert client.get("/static/styles.css").status_code == 200
     assert client.get("/status").status_code == 200
     assert client.post("/documents", json={"title": " ", "text": "tree"}).status_code == 422
     assert client.post("/documents", json={"title": "T", "text": "tree", "extra": 1}).status_code == 422
