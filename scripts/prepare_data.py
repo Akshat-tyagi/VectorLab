@@ -15,7 +15,7 @@ from vectorlab.embeddings import create_embedder
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--count", type=int, default=100_000)
-    parser.add_argument("--backend", choices=["sentence-transformers", "ollama"], default="sentence-transformers")
+    parser.add_argument("--backend", choices=["sentence-transformers"], default="sentence-transformers")
     parser.add_argument("--model")
     parser.add_argument("--output", type=Path, default=Path("data"))
     args = parser.parse_args()

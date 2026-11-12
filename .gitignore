@@ -22,3 +22,8 @@ data/*
 reports/*.npz
 reports/**/*.npz
 reports/matplotlib-cache/
+
+# Credentials stay on this machine
+.env
+.env.*
+!.env.example

@@ -63,13 +63,6 @@ The command also encodes all distinct SQuAD validation paragraphs and saves 25 q
 
 Generated files under `data/` include embeddings, source row IDs, source texts, model identity, corpus hash, and evaluation labels. They are ignored by Git. Downloads require internet access and disk space; model inference and pure Python graph construction can take substantial CPU time. Dataset/model revisions currently follow the upstream defaults; archive generated metadata and embeddings when reproducing a particular run. Check upstream dataset terms before redistributing source text.
 
-For Ollama embeddings, install Ollama and pull `nomic-embed-text`, then use:
-
-```sh
-ollama pull nomic-embed-text
-python -m scripts.prepare_data --backend ollama --count 100000
-```
-
 ## Benchmark and charts
 
 ```sh
@@ -99,13 +92,24 @@ python -m scripts.evaluate_rag --k 3 --max-distance 0.4
 
 ## API and persistence
 
+Create `.env` from `.env.example` if it is missing (copy it with your file manager, or run `python -c "from pathlib import Path; p=Path('.env'); p.exists() or p.write_text(Path('.env.example').read_text())"`). Paste your key from the [Groq console](https://console.groq.com/keys):
+
+```dotenv
+GROQ_API_KEY=your_key_here
+GROQ_MODEL=openai/gpt-oss-20b
+```
+
+The server automatically loads this repository's `.env`; existing shell environment variables take precedence. Restart after changing settings. `.env` is ignored by Git; never put the key in frontend JavaScript. Search and document management work without a Groq key; AI answers with evidence require one. Missing credentials, rate limits, and connection failures appear as actionable errors.
+
+Only answer generation uses Groq Cloud. Questions and retrieved source passages are sent to Groq; embeddings, the custom vector index, and document snapshots remain local. Sentence-transformers is a local embedding encoder, not the answer-generating LLM. Keeping its model preserves compatibility with existing snapshots. The default generation model is `openai/gpt-oss-20b` ([provider documentation](https://console.groq.com/docs/model/openai/gpt-oss-20b)); availability and limits depend on your Groq account. Live Groq generation is verified by the project maintainer.
+
 ```sh
 python -m uvicorn vectorlab.api:create_app --factory --host 127.0.0.1 --port 8080
 ```
 
 Open **<http://127.0.0.1:8080/>** for the frontend. Use **Semantic search** to find relevant passages, **Documents** to add, filter, browse, and delete stored chunks, and **Ask AI** to get an answer with its retrieved sources. The interface includes loading states, empty-result messages, and error feedback. It uses the same server as the API; no frontend installation or build step is needed.
 
-Interactive request/response documentation remains available at <http://127.0.0.1:8080/docs>. The default sentence-transformer downloads on first startup. To use Ollama, set `VECTORLAB_BACKEND=ollama` and optionally `VECTORLAB_MODEL=nomic-embed-text` in your shell before starting. `VECTORLAB_SNAPSHOT` selects the snapshot path (default `data/documents.npz`); `VECTORLAB_MAX_DISTANCE` sets the relevance threshold (default 0.4).
+Interactive request/response documentation remains available at <http://127.0.0.1:8080/docs>. The default sentence-transformer embedding model downloads on first startup. No Ollama or local answer-generation model is needed. `VECTORLAB_SNAPSHOT` selects the snapshot path (default `data/documents.npz`); `VECTORLAB_MAX_DISTANCE` sets the relevance threshold (default 0.4).
 
 | Method | Endpoint | Input / behavior |
 |---|---|---|
@@ -114,11 +118,11 @@ Interactive request/response documentation remains available at <http://127.0.0.
 | GET | `/documents` | Stored document chunks |
 | DELETE | `/documents/{id}` | Delete a chunk and persist |
 | POST | `/search` | `{"question":"What is a tree?","k":3}` |
-| POST | `/ask` | Same input; retrieve evidence, then generate with Ollama |
+| POST | `/ask` | Same input; retrieve evidence, then generate with Groq |
 
-For generation, run Ollama with `ollama pull llama3.2`. `/ask` returns `abstained: true` and a clear no-evidence response when retrieval finds nothing within the threshold; it does not invoke the LLM in that case. With evidence, the prompt requests evidence-only answers and citations, but prompts cannot guarantee model faithfulness.
+For generation, configure `GROQ_API_KEY` in `.env`. `/ask` returns `abstained: true` and a clear no-evidence response when retrieval finds nothing within the threshold; it does not invoke the LLM in that case. With evidence, the prompt requests evidence-only answers and citations, but prompts cannot guarantee model faithfulness.
 
-To start the API with a few thousand prepared real documents without embedding them twice, run `python -m scripts.ingest_data --limit 3000` before starting the server. The import refuses to overwrite an existing snapshot. Use the same embedding backend/model for data preparation and the server.
+To start the API with a few thousand prepared real documents without embedding them twice, run `python -m scripts.ingest_data --limit 3000` before starting the server. The import refuses to overwrite an existing snapshot. Use the same embedding model for data preparation and the server.
 
 Document insertion uses 250-word chunks with 30-word overlap. All chunk embeddings are generated and validated before mutation, preventing partial inserts after an embedding failure. Graph, text, IDs, and model identity share one atomic snapshot, and startup reloads them. Persistence failure raises an error; mutations are not rolled back in memory on disk failure. The document store serializes index access with a lock. Use **one API worker**, because multiple worker processes would have independent memory and could overwrite the snapshot. The core index classes themselves are not thread-safe.
 
@@ -128,7 +132,8 @@ This is a local developer application: no authentication, replication, transacti
 
 ```text
 vectorlab/indexes.py       NumPy metrics, brute force, KD-tree, HNSW, snapshots
-vectorlab/embeddings.py    Sentence-transformer and Ollama adapters
+vectorlab/embeddings.py    Local sentence-transformer embeddings
+vectorlab/generation.py    Groq Cloud answer generation and safe errors
 vectorlab/rag.py           Chunking, persistent document store, retrieval and abstention
 vectorlab/api.py           FastAPI app factory and Pydantic inputs
 vectorlab/static/          Browser interface (HTML, CSS, JavaScript)

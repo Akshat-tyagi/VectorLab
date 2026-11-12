@@ -8,6 +8,9 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field
+from dotenv import load_dotenv
+
+from .generation import GenerationError, GroqGenerator
 
 from .embeddings import Embedder, create_embedder
 from .rag import DocumentStore
@@ -26,8 +29,9 @@ class QueryInput(BaseModel):
 
 
 def create_app(path: Path | None = None, embedder: Embedder | None = None) -> FastAPI:
-    encoder = embedder or create_embedder(os.getenv("VECTORLAB_BACKEND", "sentence-transformers"),
-                                         os.getenv("VECTORLAB_MODEL"))
+    load_dotenv(Path(__file__).resolve().parent.parent / ".env", override=False)
+    generator = GroqGenerator.from_env()
+    encoder = embedder or create_embedder(model=os.getenv("VECTORLAB_MODEL"))
     threshold = float(os.getenv("VECTORLAB_MAX_DISTANCE", "0.4"))
     if not 0 <= threshold <= 2:
         raise ValueError("VECTORLAB_MAX_DISTANCE must lie in [0,2]")
@@ -53,7 +57,8 @@ def create_app(path: Path | None = None, embedder: Embedder | None = None) -> Fa
         with store.lock:
             return {"documents": len(store.documents), "model": encoder.model,
                     "dims": store.index.dim if store.index else None,
-                    "max_distance": threshold}
+                    "max_distance": threshold, "generation_provider": "groq",
+                    "generation_model": generator.model, "generation_configured": generator.configured}
 
     @app.post("/documents", status_code=201)
     def insert(body: DocumentInput) -> dict:
@@ -77,7 +82,10 @@ def create_app(path: Path | None = None, embedder: Embedder | None = None) -> Fa
     @app.post("/ask")
     def ask(body: QueryInput) -> dict:
         try:
-            return store.ask(body.question, body.k)
+            result = store.ask(body.question, body.k, generator=generator)
+            return {**result, "provider": "groq", "model": generator.model}
+        except GenerationError as exc:
+            raise HTTPException(503, str(exc)) from exc
         except (OSError, KeyError) as exc:
             raise HTTPException(503, "embedding or generation service unavailable") from exc
 

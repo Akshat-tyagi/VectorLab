@@ -29,7 +29,6 @@ async function request(path, options = {}) {
   if (!response.ok) {
     let detail = data.detail || data.error || 'Request failed.';
     if (Array.isArray(detail)) detail = detail.map((item) => item.msg).join('; ');
-    if (response.status === 503) detail += ' For AI answers, start Ollama and run: ollama pull llama3.2';
     if (response.status >= 500 && response.status !== 503) detail = 'The server could not complete this request. Check the embedding service and server logs.';
     throw new Error(String(detail));
   }
@@ -47,6 +46,9 @@ async function refreshStatus() {
     $('dimensions').textContent = status.dims ?? 'Not set';
     $('model').textContent = status.model.replace('sentence-transformers/', '');
     $('model').title = status.model;
+    $('generation-help').textContent = status.generation_configured
+      ? `Answers use Groq · ${status.generation_model}. Your question and retrieved passages are sent to Groq.`
+      : 'Add GROQ_API_KEY to the server .env file and restart to enable Groq answers. Search works without a key.';
     $('connection').textContent = 'Backend connected';
     $('connection').className = 'connection online';
   } catch (error) {
@@ -192,7 +194,7 @@ $('ask-form').addEventListener('submit', (event) => {
     try {
       const data = await post('/ask', { question, k });
       const answer = element('article', data.abstained ? 'result-card answer-card abstained' : 'result-card answer-card');
-      answer.append(element('p', 'answer-label', data.abstained ? 'NO RELEVANT EVIDENCE' : 'ANSWER · LLAMA3.2'), element('p', 'answer-text', data.answer));
+      answer.append(element('p', 'answer-label', data.abstained ? 'NO RELEVANT EVIDENCE' : `ANSWER · GROQ · ${data.model}`), element('p', 'answer-text', data.answer));
       area.replaceChildren(answer);
       if (data.contexts.length) {
         area.append(element('h3', '', `Source passages (${data.contexts.length})`));

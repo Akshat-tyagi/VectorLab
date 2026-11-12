@@ -8,7 +8,8 @@ from typing import Callable
 
 import numpy as np
 
-from .embeddings import Embedder, generate
+from .embeddings import Embedder
+from .generation import generate
 from .indexes import HNSW
 
 
