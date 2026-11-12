@@ -30,6 +30,8 @@ def main() -> None:
     permutation = np.random.default_rng(42).permutation(len(news))[:args.count]
     texts = [news[int(i)]["text"] for i in permutation]
     queries = [held_out[i]["text"] for i in range(100)]
+    corpus_texts = set(texts)
+    query_overlap = sum(query in corpus_texts for query in queries)
     print(f"Encoding {len(texts)} AG News documents with {encoder.model}", flush=True)
     # Checkpoint each batch to permit resuming expensive encoding.
     batch_dir = args.output / "embedding_batches"
@@ -49,6 +51,7 @@ def main() -> None:
     np.savez_compressed(args.output / "news.npz", vectors=vectors, queries=encoder.encode(queries))
     (args.output / "news.json").write_text(json.dumps({"dataset": "fancyzhx/ag_news", "split": "train",
         "query_split": "test", "seed": 42, "model": encoder.model, "backend": args.backend,
+        "exact_text_query_overlap_count": query_overlap,
         "count": len(texts), "dim": int(vectors.shape[1]), "corpus_sha256": identity,
         "encoding_seconds": time.perf_counter() - start,
         "source_rows": permutation.tolist(), "texts": texts, "queries": queries}, ensure_ascii=False), encoding="utf-8")

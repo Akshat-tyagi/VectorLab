@@ -71,6 +71,7 @@ def main() -> None:
         provenance = json.loads(provenance_path.read_text(encoding="utf-8"))
         metadata["dataset"] = {key: provenance[key] for key in
                                ["dataset", "split", "query_split", "model", "backend", "corpus_sha256"]}
+        metadata["dataset"]["exact_text_query_overlap_count"] = provenance.get("exact_text_query_overlap_count")
     (args.output / "benchmark_environment.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
     fields = ["n", "algorithm", "M", "ef", "ef_construction", "build_seconds", "snapshot_bytes",
               "recall_at_k", "p50_ms", "p95_ms", "mean_ms"]

@@ -15,6 +15,17 @@ def main() -> None:
     environment = json.loads((args.reports / "benchmark_environment.json").read_text(encoding="utf-8"))
     k, query_count, dim = environment["k"], environment["queries"], environment["dim"]
     model = environment.get("dataset", {}).get("model", rag["model"])
+    validation = []
+    test_path = args.reports / "pytest.txt"
+    if test_path.exists():
+        summary = next((line.strip() for line in test_path.read_text().splitlines() if " passed" in line), "see log")
+        validation.append(f"Recorded correctness run: {summary}. [pytest.txt](pytest.txt).")
+    smoke_path = args.reports / "api_real_smoke.json"
+    if smoke_path.exists():
+        smoke = json.loads(smoke_path.read_text())
+        validation.append(f"The API smoke check used {smoke['real_documents']:,} real AG News documents; "
+                          f"restart preserved search results: {smoke['restart_preserved_results']}. "
+                          "[api_real_smoke.json](api_real_smoke.json).")
     lines = ["# Measured results", "", "These are measurements from this checkout, not target numbers or simulated timings.", "",
              "## Search", "", f"AG News documents encoded with {model} ({dim} dimensions). "
              f"{query_count} held-out AG News test documents serve as queries; k={k}, cosine distance, seed=42, ef_construction=100. "
@@ -52,6 +63,7 @@ def main() -> None:
               "SQuAD paragraphs are retrieval units here; the API's overlapping word chunker is separately unit-tested. "
               "Retrieval success does not establish answer correctness. These retrieval metrics "
               "do not score generated-answer faithfulness.", "",
+              "## Validation", "", " ".join(validation) or "No validation artifacts recorded.", "",
               "## Reproduce", "", "```sh", "python -m scripts.prepare_data --count 100000",
               "python -m scripts.benchmark --sizes 1000 10000 100000 --m 8 16 --ef 20 50 100 --queries 100",
               "python -m scripts.evaluate_rag", "python -m scripts.plot_results",

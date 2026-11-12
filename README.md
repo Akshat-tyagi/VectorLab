@@ -87,6 +87,8 @@ Python spends time on heap operations, sets, dictionaries, recursion, neighbor s
 
 Measured results and any outstanding runs are documented in [reports/RESULTS.md](reports/RESULTS.md). No performance numbers should be inferred from the example commands.
 
+The committed report contains all 24 completed configurations, including 100k vectors. At 100k, M=16 and ef=100 reached 99.2% recall@10 with 3.90 ms median latency; the exact baseline measured 36.52 ms. HNSW construction took about nine minutes per 100k graph on the measured machine. Brute force was faster at 1k. These observations apply to this dataset and environment.
+
 ## RAG evaluation
 
 ```sh
@@ -128,11 +130,14 @@ vectorlab/embeddings.py    Sentence-transformer and Ollama adapters
 vectorlab/rag.py           Chunking, persistent document store, retrieval and abstention
 vectorlab/api.py           FastAPI app factory and Pydantic inputs
 scripts/prepare_data.py    Download and encode real datasets
+scripts/ingest_data.py     Seed the API with prepared real documents
+scripts/build_stream.py    Optional overlapping graph construction
 scripts/benchmark.py       Recall, latency, build time and snapshot size
 scripts/evaluate_rag.py    Answer-labeled retrieval evaluation
 scripts/plot_results.py    Chart from measured CSV
+scripts/summarize_results.py  Readable report from measured artifacts
 tests/                    Correctness, persistence and API tests
 reports/                   Measured artifacts and limitations
 ```
 
-The tests deliberately use small deterministic arrays and fake embedders to run without downloads; those fixtures never feed the reported real-data experiments. Git history records implementation milestones. The local folder and remote repository name are not changed automatically; the project/package name is **VectorLab NumPy**.
+The tests deliberately use small deterministic arrays and fake embedders to run without downloads; those fixtures never feed the reported real-data experiments. Git history records implementation milestones. The project directory and package are named `vectorlab-numpy`; the project title is **VectorLab NumPy**.

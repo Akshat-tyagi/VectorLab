@@ -1,0 +1,51 @@
+{
+  "python": "3.14.7",
+  "numpy": "2.5.4",
+  "platform": "Linux-7.2.7-100.fc43.x86_64-x86_64-with-glibc2.42",
+  "processor": "12th Gen Intel(R) Core(TM) i7-12700H",
+  "cpu_count": 20,
+  "dim": 384,
+  "queries": 100,
+  "k": 10,
+  "metric": "cosine",
+  "seed": 42,
+  "threads": {
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1"
+  },
+  "data_path": "data/news.npz",
+  "arguments": {
+    "data": "data/news.npz",
+    "sizes": [
+      1000,
+      10000,
+      100000
+    ],
+    "m": [
+      8,
+      16
+    ],
+    "ef": [
+      20,
+      50,
+      100
+    ],
+    "ef_construction": 100,
+    "queries": 100,
+    "k": 10,
+    "output": "reports",
+    "prebuilt_dir": "data/prebuilt",
+    "skip_kdtree": false
+  },
+  "dataset": {
+    "dataset": "fancyzhx/ag_news",
+    "split": "train",
+    "query_split": "test",
+    "model": "sentence-transformers/all-MiniLM-L6-v2",
+    "backend": "sentence-transformers",
+    "corpus_sha256": "c120393bb8987105abca726c56ae29b25cd07a374fc954794a8b8a9454bbbed6",
+    "exact_text_query_overlap_count": 0
+  },
+  "source_revision": "f3803edf6612ac8f5d711981d1622c56507a13d4",
+  "metadata_notes": "CPU model and exact-text train/test overlap were audited after measurement. No query text exactly matches an indexed document."
+}
