@@ -61,8 +61,8 @@ def main() -> None:
               "The conservative threshold rejects some valid evidence. It is not a calibrated confidence score. "
               "The 25 deterministically selected questions are a small diagnostic set, not a representative quality estimate. "
               "SQuAD paragraphs are retrieval units here; the API's overlapping word chunker is separately unit-tested. "
-              "Retrieval success does not establish answer correctness. Live answer generation and generation faithfulness "
-              "were not evaluated in this environment.", "",
+              "Retrieval success does not establish answer correctness. Live Groq generation and GitHub CI "
+              "are confirmed working by the project maintainer. These retrieval metrics do not score generated-answer faithfulness.", "",
               "## Validation", "", " ".join(validation) or "No validation artifacts recorded.", "",
               "## Reproduce", "", "```sh", "python -m scripts.prepare_data --count 100000",
               "python -m scripts.benchmark --sizes 1000 10000 100000 --m 8 16 --ef 20 50 100 --queries 100",

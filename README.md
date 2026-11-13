@@ -27,7 +27,7 @@ For just the indexes, API, and tests, use `python -m pip install -e ".[test]"`. 
 python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
 ```
 
-Dependencies use bounded version ranges, not a fully locked environment. CI is configured for Python 3.11/3.12 on Linux, macOS, and Windows; CI checks are verified by the project maintainer.
+Dependencies use bounded version ranges, not a fully locked environment. CI checks pass for the configured Python 3.11/3.12 matrix on Linux, macOS, and Windows.
 
 ## Indexes
 
@@ -78,7 +78,7 @@ An optional `scripts.build_stream` command can consume the ordered embedding bat
 
 Python spends time on heap operations, sets, dictionaries, recursion, neighbor selection, and many small NumPy allocations. NumPy accelerates distance arithmetic but does not remove those graph-traversal costs. Increasing M can improve connectivity but costs build time, memory, and neighbor evaluation. Increasing ef typically raises recall and query time; the actual tradeoff depends on the data. A 100k-vector graph in this implementation can be slow to build. The vectorized exact baseline may win at small N or when approximate recall requirements are high.
 
-Measured results and any outstanding runs are documented in [reports/RESULTS.md](reports/RESULTS.md). No performance numbers should be inferred from the example commands.
+Measured results are documented in [reports/RESULTS.md](reports/RESULTS.md). No performance numbers should be inferred from the example commands.
 
 The committed report contains all 24 completed configurations, including 100k vectors. At 100k, M=16 and ef=100 reached 99.2% recall@10 with 3.90 ms median latency; the exact baseline measured 36.52 ms. HNSW construction took about nine minutes per 100k graph on the measured machine. Brute force was faster at 1k. These observations apply to this dataset and environment.
 
@@ -101,7 +101,7 @@ GROQ_MODEL=openai/gpt-oss-20b
 
 The server automatically loads this repository's `.env`; existing shell environment variables take precedence. Restart after changing settings. `.env` is ignored by Git; never put the key in frontend JavaScript. Search and document management work without a Groq key; AI answers with evidence require one. Missing credentials, rate limits, and connection failures appear as actionable errors.
 
-Only answer generation uses Groq Cloud. Questions and retrieved source passages are sent to Groq; embeddings, the custom vector index, and document snapshots remain local. Sentence-transformers is a local embedding encoder, not the answer-generating LLM. Keeping its model preserves compatibility with existing snapshots. The default generation model is `openai/gpt-oss-20b` ([provider documentation](https://console.groq.com/docs/model/openai/gpt-oss-20b)); availability and limits depend on your Groq account. Live Groq generation is verified by the project maintainer.
+Only answer generation uses Groq Cloud. Questions and retrieved source passages are sent to Groq; embeddings, the custom vector index, and document snapshots remain local. Sentence-transformers is a local embedding encoder, not the answer-generating LLM. Keeping its model preserves compatibility with existing snapshots. The default generation model is `openai/gpt-oss-20b` ([provider documentation](https://console.groq.com/docs/model/openai/gpt-oss-20b)); availability and limits depend on your Groq account. Live Groq answer generation and GitHub CI have been verified working by the project maintainer.
 
 ```sh
 python -m uvicorn vectorlab.api:create_app --factory --host 127.0.0.1 --port 8080

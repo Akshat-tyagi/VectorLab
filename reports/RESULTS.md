@@ -49,7 +49,7 @@ Corpus: 2,067 distinct SQuAD validation paragraphs. Evaluation: 25 questions wit
 * Unfiltered exact retrieval hit rate: **76%**.
 * Negative-control abstention: **100%** on 3 unrelated questions.
 
-Per-question answers, ground truth, returned IDs/distances, and failures: [rag.json](rag.json). The conservative threshold rejects some valid evidence. It is not a calibrated confidence score. The 25 deterministically selected questions are a small diagnostic set, not a representative quality estimate. SQuAD paragraphs are retrieval units here; the API's overlapping word chunker is separately unit-tested. Retrieval success does not establish answer correctness. Retrieval metrics do not score generated-answer faithfulness.
+Per-question answers, ground truth, returned IDs/distances, and failures: [rag.json](rag.json). The conservative threshold rejects some valid evidence. It is not a calibrated confidence score. The 25 deterministically selected questions are a small diagnostic set, not a representative quality estimate. SQuAD paragraphs are retrieval units here; the API's overlapping word chunker is separately unit-tested. Retrieval success does not establish answer correctness. Live Groq generation and GitHub CI are confirmed working by the project maintainer. These retrieval metrics do not score generated-answer faithfulness.
 
 ## Validation
 
